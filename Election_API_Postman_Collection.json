@@ -1,0 +1,597 @@
+{
+  "info": {
+    "name": "Election API - Sistema Completo",
+    "description": "Colección completa para probar el sistema de elecciones",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "electionId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "candidateId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "partyId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "voterId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "0. Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "health"]
+        }
+      }
+    },
+    {
+      "name": "1. Auth",
+      "item": [
+        {
+          "name": "Register Admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Administrador Electoral\",\n  \"email\": \"admin@elecciones.com\",\n  \"password\": \"AdminPass123!\",\n  \"role\": \"admin\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.to.have.status(200)) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set(\"token\", response.data.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@elecciones.com\",\n  \"password\": \"AdminPass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "login"]
+            }
+          }
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "profile"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Elections",
+      "item": [
+        {
+          "name": "Create Election",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.to.have.status(201)) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set(\"electionId\", response.data._id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Elecciones Estudiantiles 2024\",\n  \"description\": \"Elección de representantes estudiantiles\",\n  \"startDate\": \"2024-12-15T08:00:00Z\",\n  \"endDate\": \"2024-12-15T18:00:00Z\",\n  \"qr_code\": \"https://elecciones.com/qr/estudiantiles2024\",\n  \"isByParty\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/elections",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "elections"]
+            }
+          }
+        },
+        {
+          "name": "Get All Elections",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/elections",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "elections"]
+            }
+          }
+        },
+        {
+          "name": "Get Election by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/elections/{{electionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "elections", "{{electionId}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Election Statistics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/elections/{{electionId}}/statistics",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "elections", "{{electionId}}", "statistics"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Parties",
+      "item": [
+        {
+          "name": "Create Party 1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.to.have.status(201)) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set(\"partyId\", response.data._id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"electionId\": \"{{electionId}}\",\n  \"name\": \"Partido Estudiantil Progresista\",\n  \"description\": \"Enfocados en la innovación y tecnología\",\n  \"logo_url\": \"https://ejemplo.com/logos/pep.png\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/parties",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "parties"]
+            }
+          }
+        },
+        {
+          "name": "Create Party 2",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"electionId\": \"{{electionId}}\",\n  \"name\": \"Movimiento Estudiantil Unido\",\n  \"description\": \"Por la unión y el bienestar estudiantil\",\n  \"logo_url\": \"https://ejemplo.com/logos/meu.png\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/parties",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "parties"]
+            }
+          }
+        },
+        {
+          "name": "Get Parties by Election",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/parties/election/{{electionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "parties", "election", "{{electionId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Candidates",
+      "item": [
+        {
+          "name": "Create Candidate 1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.to.have.status(201)) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set(\"candidateId\", response.data._id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"electionId\": \"{{electionId}}\",\n  \"name\": \"Ana García\",\n  \"description\": \"Candidata a Presidenta Estudiantil\",\n  \"partyId\": \"{{partyId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/candidates",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "candidates"]
+            }
+          }
+        },
+        {
+          "name": "Create Candidate 2",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"electionId\": \"{{electionId}}\",\n  \"name\": \"Carlos Mendoza\",\n  \"description\": \"Candidato a Presidente Estudiantil\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/candidates",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "candidates"]
+            }
+          }
+        },
+        {
+          "name": "Get Candidates by Election",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/candidates/election/{{electionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "candidates", "election", "{{electionId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Voters",
+      "item": [
+        {
+          "name": "Register Single Voter",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.to.have.status(201)) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set(\"voterId\", response.data._id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"electionId\": \"{{electionId}}\",\n  \"cedula\": \"1234567890\",\n  \"face_url\": \"https://ejemplo.com/fotos/votante1.jpg\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/voters",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "voters"]
+            }
+          }
+        },
+        {
+          "name": "Bulk Register Voters",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"electionId\": \"{{electionId}}\",\n  \"voters\": [\n    {\n      \"cedula\": \"0987654321\",\n      \"face_url\": \"https://ejemplo.com/fotos/votante2.jpg\"\n    },\n    {\n      \"cedula\": \"1122334455\",\n      \"face_url\": \"https://ejemplo.com/fotos/votante3.jpg\"\n    },\n    {\n      \"cedula\": \"5566778899\",\n      \"face_url\": \"https://ejemplo.com/fotos/votante4.jpg\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/voters/bulk",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "voters", "bulk"]
+            }
+          }
+        },
+        {
+          "name": "Find Voter by Cedula",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/voters/election/{{electionId}}/cedula/1234567890",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "voters", "election", "{{electionId}}", "cedula", "1234567890"]
+            }
+          }
+        },
+        {
+          "name": "Get Voters by Election",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/voters/election/{{electionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "voters", "election", "{{electionId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Voting",
+      "item": [
+        {
+          "name": "Check Voter Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/votes/voter/{{voterId}}/election/{{electionId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "votes", "voter", "{{voterId}}", "election", "{{electionId}}", "status"]
+            }
+          }
+        },
+        {
+          "name": "Cast Vote",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"voterId\": \"{{voterId}}\",\n  \"electionId\": \"{{electionId}}\",\n  \"candidateId\": \"{{candidateId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/votes/cast",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "votes", "cast"]
+            }
+          }
+        },
+        {
+          "name": "Get Voting Statistics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/votes/election/{{electionId}}/statistics",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "votes", "election", "{{electionId}}", "statistics"]
+            }
+          }
+        },
+        {
+          "name": "Get Final Results",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/votes/election/{{electionId}}/results",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "votes", "election", "{{electionId}}", "results"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Dashboard",
+      "item": [
+        {
+          "name": "Get Dashboard Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "stats"]
+            }
+          }
+        },
+        {
+          "name": "Get System Activity",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/activity",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "activity"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
